@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>d4faef27-8e3b-4324-a2de-9632b9f59ff7</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>VAT.py</StartupFile>
+    <StartupFile>EarDetect.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -22,6 +22,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="EarDetect.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="VAT.py" />
   </ItemGroup>
   <PropertyGroup>
