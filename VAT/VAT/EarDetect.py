@@ -34,7 +34,18 @@ while(cap.isOpened()):
     b = cv2.getTrackbarPos('b','image')
     bArr = cv2.inRange(frame[:,:,0],  0 if b <= 10 else (b-10), 255 if b >= 245 else (255-b))
 
-        
+
+    np.array(rArray)
+
+    
+
+    #difference between 255 and 0
+    #
+
+    print(e3)
+    
+
+    
 
     #reR, threshR = cv2.threshold(frame[:,:,0], cv2.getTrackbarPos('r','image') - 10, 255, cv2.THRESH_BINARY)
     #reG, threshG = cv2.threshold(frame[:,:,1], cv2.getTrackbarPos('g','image') - 10, 255, cv2.THRESH_BINARY)
