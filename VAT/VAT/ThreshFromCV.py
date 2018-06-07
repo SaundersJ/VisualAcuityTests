@@ -76,7 +76,7 @@ def on_high_V_thresh_trackbar(val):
 ## [cap]
 CV_CAP_PROP_FRAME_WIDTH = 3
 CV_CAP_PROP_FRAME_HEIGHT = 4
-cap = cv.VideoCapture("C:/Users/Jack/Desktop/python/Project./IMG_0845.MOV")
+cap = cv.VideoCapture("C:/Users/Jack/Desktop/python/Project./TA2.mp4")
 #cap.set(CV_CAP_PROP_FRAME_WIDTH, cap.get(CV_CAP_PROP_FRAME_WIDTH)/2);
 #cap.set(CV_CAP_PROP_FRAME_HEIGHT, cap.get(CV_CAP_PROP_FRAME_HEIGHT)/2);
 ## [cap]
@@ -130,8 +130,7 @@ while True:
     kMeans.fit(data)
     centers = kMeans.cluster_centers_
     for c in centers:
-
-        cv.circle(frame, (math.floor(c[0]), math.floor(c[1])), 40, (0,0,255), thickness=5)
+        cv.circle(frame, (math.floor(c[1]), math.floor(c[0])), 20, (0,0,255), thickness=2)
     ## [while]
 
     ## [show]
