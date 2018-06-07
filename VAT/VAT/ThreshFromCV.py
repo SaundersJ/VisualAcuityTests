@@ -2,6 +2,8 @@
 from __future__ import print_function
 import cv2 as cv
 import argparse
+from sklearn.cluster import MiniBatchKMeans
+import math
 
 max_value = 255
 max_value_H = 360//2
@@ -114,6 +116,22 @@ while True:
 
     frame_HSV = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
     frame_threshold = cv.inRange(frame, (low_H, low_S, low_V), (high_H, high_S, high_V))
+    
+    
+    data = []
+    for i in range(len(frame_threshold)):
+        for j in range(len(frame_threshold[i])):
+            if frame_threshold[i][j] == 255:
+                data.append([i, j])
+
+
+    kMeans = MiniBatchKMeans(n_clusters=4)
+    
+    kMeans.fit(data)
+    centers = kMeans.cluster_centers_
+    for c in centers:
+
+        cv.circle(frame, (math.floor(c[0]), math.floor(c[1])), 40, (0,0,255), thickness=5)
     ## [while]
 
     ## [show]
