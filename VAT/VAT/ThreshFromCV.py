@@ -4,6 +4,10 @@ import cv2 as cv
 import argparse
 from sklearn.cluster import MiniBatchKMeans
 import math
+import moviepy
+from moviepy.video.io import VideoFileClip
+from pathlib import Path
+from datetime import datetime
 
 max_value = 255
 max_value_H = 360//2
@@ -72,13 +76,62 @@ def on_high_V_thresh_trackbar(val):
 #parser = argparse.ArgumentParser(description='Code for Thresholding Operations using inRange tutorial.')
 #parser.add_argument('--camera', help='Camera devide number.', default=0, type=int)
 #args = parser.parse_args()
+#my_clip = VideoFileClip(fileName)
+#clip = moviepy.video.fx.all.resize(my_clip, 480, 270)
+
+fileName = "C:/Users/Jack/Desktop/python/Project/IMG_0845.MOV"
+split = fileName.split(".")
+resizedFileName = split[0] + "_resized.avi"
+my_file = Path(resizedFileName)
+
+if not my_file.is_file():
+    print("Resizing File")
+    window_resize = "Resize"
+    cv.namedWindow(window_resize)
+    cap = cv.VideoCapture(fileName)
+    out = cv.VideoWriter(resizedFileName, cv.VideoWriter_fourcc(*'XVID'), 30.0, (480, 270))
+
+    frameCount = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
+
+    #Resize the file
+    millis = datetime.now().microsecond
+    i = 1
+    while True:
+        i = i + 1
+        print(i/frameCount)
+        ret, frame = cap.read()
+        frame = cv.resize(frame, (480, 270), interpolation = cv.INTER_LINEAR)
+        out.write(frame)
+        key = cv.waitKey(30)
+        cv.imshow(window_resize, frame)
+        if i == frameCount or key == ord('q') or key == 27:
+            break
+        if i % 1000 == 0:
+            newMillis = datetime.now().microsecond
+            timeDifference = millis - newMillis
+            remainingFrames = (frameCount - i)
+            totalEstimatedTime = ((remainingFrames/1000) * timeDifference) / 1000
+            print("=======[Seconds Remaining]======")
+            print(i)
+            print("------")
+            print(frameCount)
+            print(totalEstimatedTime)
+            print("================================")
+            millis = newMillis
+            #get time per 1000 frames
+            #multiiply the time by number of 1000 frames left
+            
+            
+    cap.release()
+    out.release()
+    cv.destroyAllWindows()
+    print("Finished Resize")
+#out = cv2.VideoWriter('output.avi', -1, 20.0, (640,480))
+
+
 
 ## [cap]
-CV_CAP_PROP_FRAME_WIDTH = 3
-CV_CAP_PROP_FRAME_HEIGHT = 4
-cap = cv.VideoCapture("C:/Users/Jack/Desktop/python/Project./TA2.mp4")
-#cap.set(CV_CAP_PROP_FRAME_WIDTH, cap.get(CV_CAP_PROP_FRAME_WIDTH)/2);
-#cap.set(CV_CAP_PROP_FRAME_HEIGHT, cap.get(CV_CAP_PROP_FRAME_HEIGHT)/2);
+cap = cv.VideoCapture(resizedFileName)
 ## [cap]
 
 ## [window]
@@ -108,7 +161,9 @@ cv.setTrackbarPos(high_V_name, window_trackbar, 229)
 
 ## [trackbar]
 
+frameNumber = 0
 while True:
+    frameNumber = frameNumber + 1
     ## [while]
     ret, frame = cap.read()
     if frame is None:
@@ -117,20 +172,22 @@ while True:
     frame_HSV = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
     frame_threshold = cv.inRange(frame, (low_H, low_S, low_V), (high_H, high_S, high_V))
     
-    
     data = []
     for i in range(len(frame_threshold)):
         for j in range(len(frame_threshold[i])):
             if frame_threshold[i][j] == 255:
                 data.append([i, j])
 
-
     kMeans = MiniBatchKMeans(n_clusters=4)
     
-    kMeans.fit(data)
-    centers = kMeans.cluster_centers_
-    for c in centers:
-        cv.circle(frame, (math.floor(c[1]), math.floor(c[0])), 20, (0,0,255), thickness=2)
+    try:
+        kMeans.fit(data)
+        centers = kMeans.cluster_centers_
+        for c in centers:
+            cv.circle(frame, (math.floor(c[1]), math.floor(c[0])), 20, (0,0,255), thickness=2)
+    except ValueError:
+        print("Frame Number {} : Too few datapoints for number of clusters".format(frameNumber))
+
     ## [while]
 
     ## [show]
