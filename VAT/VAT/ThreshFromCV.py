@@ -4,7 +4,7 @@ import cv2 as cv
 import argparse
 
 max_value = 255
-max_value_H = 255
+max_value_H = 360//2
 low_H = 0
 low_S = 0
 low_V = 0
@@ -14,12 +14,12 @@ high_V = max_value
 window_capture_name = 'Video Capture'
 window_detection_name = 'Object Detection'
 window_trackbar = 'Track Bar'
-low_H_name = 'Low R'
-low_S_name = 'Low G'
-low_V_name = 'Low B'
-high_H_name = 'High R'
-high_S_name = 'High G'
-high_V_name = 'High B'
+low_H_name = 'Low H'
+low_S_name = 'Low S'
+low_V_name = 'Low V'
+high_H_name = 'High H'
+high_S_name = 'High S'
+high_V_name = 'High V'
 
 ## [low]
 def on_low_H_thresh_trackbar(val):
@@ -96,6 +96,14 @@ cv.createTrackbar(low_S_name, window_trackbar , low_S, max_value, on_low_S_thres
 cv.createTrackbar(high_S_name, window_trackbar , high_S, max_value, on_high_S_thresh_trackbar)
 cv.createTrackbar(low_V_name, window_trackbar , low_V, max_value, on_low_V_thresh_trackbar)
 cv.createTrackbar(high_V_name, window_trackbar , high_V, max_value, on_high_V_thresh_trackbar)
+
+cv.setTrackbarPos(low_H_name, window_trackbar, 0)
+cv.setTrackbarPos(high_H_name, window_trackbar, 86)
+cv.setTrackbarPos(low_S_name, window_trackbar, 31)
+cv.setTrackbarPos(high_S_name, window_trackbar, 255)
+cv.setTrackbarPos(low_V_name, window_trackbar, 124)
+cv.setTrackbarPos(high_V_name, window_trackbar, 229)
+
 ## [trackbar]
 
 while True:
@@ -104,7 +112,7 @@ while True:
     if frame is None:
         break
 
-    #frame_HSV = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
+    frame_HSV = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
     frame_threshold = cv.inRange(frame, (low_H, low_S, low_V), (high_H, high_S, high_V))
     ## [while]
 
