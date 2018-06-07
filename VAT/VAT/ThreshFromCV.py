@@ -8,6 +8,7 @@ import moviepy
 from moviepy.video.io import VideoFileClip
 from pathlib import Path
 from datetime import datetime
+import numpy as np
 
 max_value = 255
 max_value_H = 360//2
@@ -179,15 +180,16 @@ while True:
                 data.append([i, j])
 
     kMeans = MiniBatchKMeans(n_clusters=4)
-    
+
     try:
         kMeans.fit(data)
         centers = kMeans.cluster_centers_
         for c in centers:
-            cv.circle(frame, (math.floor(c[1]), math.floor(c[0])), 20, (0,0,255), thickness=2)
+            cv.circle(frame, (math.floor(c[1]), math.floor(c[0])), 20, (0,0,255), thickness=1)
+            for oC in centers:
+                cv.line(frame, (math.floor(c[1]), math.floor(c[0])), (math.floor(oC[1]), math.floor(oC[0])), (255,0,0), thickness=1)
     except ValueError:
         print("Frame Number {} : Too few datapoints for number of clusters".format(frameNumber))
-
     ## [while]
 
     ## [show]
