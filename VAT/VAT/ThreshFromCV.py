@@ -197,7 +197,7 @@ cap.release()
 
 frameNo = 0
 capFinal = cv.VideoCapture(resizedFileName)
-
+gradientBefore = 0
 while True:
     frameNo = frameNo + 1
     ret, frame = capFinal.read()
@@ -216,7 +216,7 @@ while True:
     kMeans = MiniBatchKMeans(n_clusters=4)
 
     #calculate the lengths of the lines and add to the array
-
+    gradients = [] 
     try:
         kMeans.fit(data)
         centers = kMeans.cluster_centers_
@@ -226,11 +226,14 @@ while True:
                 length = calculateLength(math.floor(c[1]), math.floor(c[0]), math.floor(oC[1]), math.floor(oC[0]))
                 if length < (lengthOfHead + 10) and length > (lengthOfHead - 10):
                     cv.line(frame, (math.floor(c[1]), math.floor(c[0])), (math.floor(oC[1]), math.floor(oC[0])), (255,0,0), thickness=1)
+                    gradients.append((math.floor(c[1]) - math.floor(oC[1]))/(math.floor(c[0]) - math.floor(oC[0])))
     except ValueError:
         LogUtil.write("Frame Number {} : Too few datapoints for number of clusters".format(frameNo))
         print("Frame Number {} : Too few datapoints for number of clusters".format(frameNo))
-    ## [while]
-
+    
+    averageGradient = np.mean(gradients)
+    cv.putText(frame, "GradChange: {0:.2f}".format(abs(gradientBefore - averageGradient)), (50,50), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 3)
+    gradientBefore = averageGradient
     ## [show]
     cv.imshow(window_capture_name, frame)
     cv.imshow(window_detection_name, frame_threshold)
