@@ -11,6 +11,7 @@ from datetime import datetime
 import numpy as np
 import ResizeVideo
 import LogUtil
+import math
 
 max_value = 255
 max_value_H = 360//2
@@ -79,7 +80,8 @@ def on_high_V_thresh_trackbar(val):
     high_V = max(high_V, low_V+1)
     cv.setTrackbarPos(high_V_name, window_trackbar, high_V)
 
-
+def calculateLength(x1, y1, x2, y2):
+    return math.sqrt((x2-x1)**2 + (y2-y1)**2)
 
 ## [Resize Video]
 LogUtil.write("Resizing Video")
@@ -120,6 +122,9 @@ cv.setTrackbarPos(high_V_name, window_trackbar, 229)
 ## [trackbar]
 LogUtil.write("Starting Tracking")
 frameNumber = 0
+
+lengths = []
+
 while True:
     frameNumber = frameNumber + 1
     ## [while]
@@ -138,6 +143,8 @@ while True:
 
     kMeans = MiniBatchKMeans(n_clusters=4)
 
+    #calculate the lengths of the lines and add to the array
+
     try:
         kMeans.fit(data)
         centers = kMeans.cluster_centers_
@@ -145,8 +152,83 @@ while True:
             cv.circle(frame, (math.floor(c[1]), math.floor(c[0])), 20, (0,0,255), thickness=1)
             for oC in centers:
                 cv.line(frame, (math.floor(c[1]), math.floor(c[0])), (math.floor(oC[1]), math.floor(oC[0])), (255,0,0), thickness=1)
+                lengths.append(calculateLength(math.floor(c[1]), math.floor(c[0]), math.floor(oC[1]), math.floor(oC[0])))
     except ValueError:
+        LogUtil.write("Frame Number {} : Too few datapoints for number of clusters".format(frameNumber))
         print("Frame Number {} : Too few datapoints for number of clusters".format(frameNumber))
+    ## [while]
+
+    ## [show]
+    cv.imshow(window_capture_name, frame)
+    cv.imshow(window_detection_name, frame_threshold)
+    ## [show]
+
+    key = cv.waitKey(30)
+    if frameNumber == 20 or key == ord('q') or key == 27:
+        break
+LogUtil.write("Finished Tracking")
+
+#length, numberOfSimilarities
+lenDict = {}
+
+for l in lengths:
+    found = False
+    for key, value in lenDict.items():
+        if abs(l - key) < 20:
+            lenDict[key] = lenDict[key] + 1
+            found = True
+            break
+    
+    if not found:
+        lenDict[l] = 1
+
+lengthOfHead = 0
+timesOfLength = 0
+for key, value in lenDict.items():
+    print("{} : {}".format(key, value))
+    if key != 0.0 and value > timesOfLength:
+        lengthOfHead = key
+        timesOfLength = value
+
+print("Chosing length {} with {} times".format(lengthOfHead, timesOfLength))
+print("Showing clip again now only with lengths mathcing the length of the head")
+cap.release()
+## ====================================== ##
+
+frameNo = 0
+capFinal = cv.VideoCapture(resizedFileName)
+
+while True:
+    frameNo = frameNo + 1
+    ret, frame = capFinal.read()
+    if frame is None:
+        break
+
+    frame_HSV = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
+    frame_threshold = cv.inRange(frame, (low_H, low_S, low_V), (high_H, high_S, high_V))
+    
+    data = []
+    for i in range(len(frame_threshold)):
+        for j in range(len(frame_threshold[i])):
+            if frame_threshold[i][j] == 255:
+                data.append([i, j])
+
+    kMeans = MiniBatchKMeans(n_clusters=4)
+
+    #calculate the lengths of the lines and add to the array
+
+    try:
+        kMeans.fit(data)
+        centers = kMeans.cluster_centers_
+        for c in centers:
+            cv.circle(frame, (math.floor(c[1]), math.floor(c[0])), 20, (0,0,255), thickness=1)
+            for oC in centers:
+                length = calculateLength(math.floor(c[1]), math.floor(c[0]), math.floor(oC[1]), math.floor(oC[0]))
+                if length < (lengthOfHead + 10) and length > (lengthOfHead - 10):
+                    cv.line(frame, (math.floor(c[1]), math.floor(c[0])), (math.floor(oC[1]), math.floor(oC[0])), (255,0,0), thickness=1)
+    except ValueError:
+        LogUtil.write("Frame Number {} : Too few datapoints for number of clusters".format(frameNo))
+        print("Frame Number {} : Too few datapoints for number of clusters".format(frameNo))
     ## [while]
 
     ## [show]
@@ -157,9 +239,5 @@ while True:
     key = cv.waitKey(30)
     if key == ord('q') or key == 27:
         break
-LogUtil.write("Finished Tracking")
-def end():
-    log.close()
 
 LogUtil.write("Finished Program {}".format(datetime.now()))
-end()
