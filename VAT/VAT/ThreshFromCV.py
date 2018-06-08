@@ -10,7 +10,7 @@ from pathlib import Path
 from datetime import datetime
 import numpy as np
 import ResizeVideo
-import AppGUI
+import LogUtil
 
 max_value = 255
 max_value_H = 360//2
@@ -29,6 +29,9 @@ low_V_name = 'Low V'
 high_H_name = 'High H'
 high_S_name = 'High S'
 high_V_name = 'High V'
+
+fileName = "C:/Users/Jack/Desktop/python/Project/IMG_0848.MOV"
+LogUtil.init(fileName)
 
 ## [low]
 def on_low_H_thresh_trackbar(val):
@@ -76,25 +79,16 @@ def on_high_V_thresh_trackbar(val):
     high_V = max(high_V, low_V+1)
     cv.setTrackbarPos(high_V_name, window_trackbar, high_V)
 
-#parser = argparse.ArgumentParser(description='Code for Thresholding Operations using inRange tutorial.')
-#parser.add_argument('--camera', help='Camera devide number.', default=0, type=int)
-#args = parser.parse_args()
-#my_clip = VideoFileClip(fileName)
-#clip = moviepy.video.fx.all.resize(my_clip, 480, 270)
+
 
 ## [Resize Video]
-fileName = "C:/Users/Jack/Desktop/python/Project/IMG_0848.MOV"
+LogUtil.write("Resizing Video")
 resizedFileName = ResizeVideo.resizeVideo(fileName)
-
-split = fileName.split(".")
-logName = split[0] + "_log.txt"
-
-txt = open(logName, "w+")
-txt.write("HEY!")
-txt.close()
+LogUtil.write("Finished Resizing Video")
 ##
 
 ## [cap]
+
 cap = cv.VideoCapture(resizedFileName)
 ## [cap]
 
@@ -124,7 +118,7 @@ cv.setTrackbarPos(low_V_name, window_trackbar, 124)
 cv.setTrackbarPos(high_V_name, window_trackbar, 229)
 
 ## [trackbar]
-
+LogUtil.write("Starting Tracking")
 frameNumber = 0
 while True:
     frameNumber = frameNumber + 1
@@ -163,3 +157,9 @@ while True:
     key = cv.waitKey(30)
     if key == ord('q') or key == 27:
         break
+LogUtil.write("Finished Tracking")
+def end():
+    log.close()
+
+LogUtil.write("Finished Program {}".format(datetime.now()))
+end()
