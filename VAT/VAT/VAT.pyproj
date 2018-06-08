@@ -22,6 +22,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AppGUI.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="EarDetect.py">
       <SubType>Code</SubType>
     </Compile>

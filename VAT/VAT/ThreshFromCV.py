@@ -10,6 +10,7 @@ from pathlib import Path
 from datetime import datetime
 import numpy as np
 import ResizeVideo
+import AppGUI
 
 max_value = 255
 max_value_H = 360//2
@@ -81,10 +82,16 @@ def on_high_V_thresh_trackbar(val):
 #my_clip = VideoFileClip(fileName)
 #clip = moviepy.video.fx.all.resize(my_clip, 480, 270)
 
-
 ## [Resize Video]
-fileName = "C:/Users/Jack/Desktop/python/Project/IMG_0845.MOV"
+fileName = "C:/Users/Jack/Desktop/python/Project/IMG_0848.MOV"
 resizedFileName = ResizeVideo.resizeVideo(fileName)
+
+split = fileName.split(".")
+logName = split[0] + "_log.txt"
+
+txt = open(logName, "w+")
+txt.write("HEY!")
+txt.close()
 ##
 
 ## [cap]
