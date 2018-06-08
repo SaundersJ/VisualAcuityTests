@@ -9,6 +9,7 @@ from moviepy.video.io import VideoFileClip
 from pathlib import Path
 from datetime import datetime
 import numpy as np
+import ResizeVideo
 
 max_value = 255
 max_value_H = 360//2
@@ -80,56 +81,11 @@ def on_high_V_thresh_trackbar(val):
 #my_clip = VideoFileClip(fileName)
 #clip = moviepy.video.fx.all.resize(my_clip, 480, 270)
 
+
+## [Resize Video]
 fileName = "C:/Users/Jack/Desktop/python/Project/IMG_0845.MOV"
-split = fileName.split(".")
-resizedFileName = split[0] + "_resized.avi"
-my_file = Path(resizedFileName)
-
-if not my_file.is_file():
-    print("Resizing File")
-    window_resize = "Resize"
-    cv.namedWindow(window_resize)
-    cap = cv.VideoCapture(fileName)
-    out = cv.VideoWriter(resizedFileName, cv.VideoWriter_fourcc(*'XVID'), 30.0, (480, 270))
-
-    frameCount = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
-
-    #Resize the file
-    millis = datetime.now().microsecond
-    i = 1
-    while True:
-        i = i + 1
-        print(i/frameCount)
-        ret, frame = cap.read()
-        frame = cv.resize(frame, (480, 270), interpolation = cv.INTER_LINEAR)
-        out.write(frame)
-        key = cv.waitKey(30)
-        cv.imshow(window_resize, frame)
-        if i == frameCount or key == ord('q') or key == 27:
-            break
-        if i % 1000 == 0:
-            newMillis = datetime.now().microsecond
-            timeDifference = millis - newMillis
-            remainingFrames = (frameCount - i)
-            totalEstimatedTime = ((remainingFrames/1000) * timeDifference) / 1000
-            print("=======[Seconds Remaining]======")
-            print(i)
-            print("------")
-            print(frameCount)
-            print(totalEstimatedTime)
-            print("================================")
-            millis = newMillis
-            #get time per 1000 frames
-            #multiiply the time by number of 1000 frames left
-            
-            
-    cap.release()
-    out.release()
-    cv.destroyAllWindows()
-    print("Finished Resize")
-#out = cv2.VideoWriter('output.avi', -1, 20.0, (640,480))
-
-
+resizedFileName = ResizeVideo.resizeVideo(fileName)
+##
 
 ## [cap]
 cap = cv.VideoCapture(resizedFileName)

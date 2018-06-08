@@ -25,6 +25,9 @@
     <Compile Include="EarDetect.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ResizeVideo.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="ThreshFromCV.py">
       <SubType>Code</SubType>
     </Compile>
