@@ -226,13 +226,33 @@ while True:
                 length = calculateLength(math.floor(c[1]), math.floor(c[0]), math.floor(oC[1]), math.floor(oC[0]))
                 if length < (lengthOfHead + 10) and length > (lengthOfHead - 10):
                     cv.line(frame, (math.floor(c[1]), math.floor(c[0])), (math.floor(oC[1]), math.floor(oC[0])), (255,0,0), thickness=1)
-                    gradients.append((math.floor(c[1]) - math.floor(oC[1]))/(math.floor(c[0]) - math.floor(oC[0])))
+                    if (math.floor(c[1]) - math.floor(oC[1]) == 0) or (math.floor(c[0]) - math.floor(oC[0]) == 0):
+                        gradients.append(0)
+                    else:
+                        g = (math.floor(c[1]) - math.floor(oC[1]))/(math.floor(c[0]) - math.floor(oC[0]))
+                        print(g)
+                        gradients.append(g)
+
     except ValueError:
         LogUtil.write("Frame Number {} : Too few datapoints for number of clusters".format(frameNo))
         print("Frame Number {} : Too few datapoints for number of clusters".format(frameNo))
     
     averageGradient = np.mean(gradients)
-    cv.putText(frame, "GradChange: {0:.2f}".format(abs(gradientBefore - averageGradient)), (50,50), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 3)
+    changeInGradient = abs(gradientBefore - averageGradient)
+    changeInRev = math.atan(changeInGradient) / (2 * math.pi)
+    fps = capFinal.get(cv.CAP_PROP_FPS)
+    
+    drumSpeed = 2 / 60 #rev/s
+    
+    print("Compare: Drum {} and mouse {}".format(drumSpeed, (1 / fps) * changeInRev))
+
+    cv.putText(frame, "RevChange: {0:.2f}".format(changeInRev), (50,50), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+
+
+
+    #changeInDegrees = math.atan(changeInGradient) * (180 / math.pi)
+    #cv.putText(frame, "GradChange: {0:.2f}".format(changeInDegrees), (50,50), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
     gradientBefore = averageGradient
     ## [show]
     cv.imshow(window_capture_name, frame)
