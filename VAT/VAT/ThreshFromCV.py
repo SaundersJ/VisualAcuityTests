@@ -198,6 +198,7 @@ cap.release()
 frameNo = 0
 capFinal = cv.VideoCapture(resizedFileName)
 gradientBefore = 0
+framesSpentAtSameRotation = 0
 while True:
     frameNo = frameNo + 1
     ret, frame = capFinal.read()
@@ -246,8 +247,12 @@ while True:
     
     print("Compare: Drum {} and mouse {}".format(drumSpeed, (1 / fps) * changeInRev))
 
+    if changeInRev > drumSpeed - 0.01 and changeInRev < drumSpeed + 0.01:
+        framesSpentAtSameRotation = framesSpentAtSameRotation + 1
+        print("{0:.2f} % looking at drum".format((framesSpentAtSameRotation / frameNo) * 100))
+    
     cv.putText(frame, "RevChange: {0:.2f}".format(changeInRev), (50,50), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-
+    
 
 
 
