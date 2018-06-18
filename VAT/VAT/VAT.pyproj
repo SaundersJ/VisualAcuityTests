@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>d4faef27-8e3b-4324-a2de-9632b9f59ff7</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>RedChannel.py</StartupFile>
+    <StartupFile>OtsuThresh.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -25,13 +25,28 @@
     <Compile Include="AppGUI.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="cellIterate.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="cells.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="EarDetect.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GroundTruth.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="KalmanFilter.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="KalmanManager.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="LogUtil.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="OtsuThresh.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="RedChannel.py">
@@ -41,6 +56,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ThreshFromCV.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TrackingV1.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="VAT.py" />

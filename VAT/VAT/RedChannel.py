@@ -71,14 +71,34 @@ while True:
 
     #(channel_h, channel_s, channel_v) = cv.split(hsv)
 
-    
+    #blur = cv.GaussianBlur(frameInv,(5,5),0)    #Any number of channels
+
+    #ret,thr = cv.threshold(blur[:,:,2], low_r, high_r ,cv.THRESH_BINARY+cv.THRESH_OTSU)
+    #ret,thg = cv.threshold(blur[:,:,1], low_r, high_r ,cv.THRESH_BINARY_INV+cv.THRESH_OTSU)
+    #ret,thb = cv.threshold(blur[:,:,0], low_g, high_g ,cv.THRESH_BINARY_INV+cv.THRESH_OTSU)
+
+    #ret,thb = cv.threshold(blur[:,:,0], low_b, high_b ,cv.THRESH_BINARY+cv.THRESH_OTSU)
+
+    #zipped = np.dstack((thb, thg, thr))
+
+    #ret,th = cv.threshold(blur, (low_r, low_g, low_b), (high_r, high_g, high_b) ,cv.THRESH_BINARY+cv.THRESH_OTSU)
 
     frame_threshold = cv.inRange(frameInv, (low_r, low_g, low_b), (high_r, high_g, high_b))
     #frame_threshold = cv.inRange(channel_v, low_r, high_r)
     mask = cv.erode(frame_threshold, None, iterations=2)
     mask = cv.dilate(mask, None, iterations=2)
-    cv.imshow(window_capture_name, frameInv)
+    
+    #frame = cv.cvtColor(frame,cv.COLOR_BGR2GRAY)
+    #blur = cv.GaussianBlur(frame,(5,5),0)
+    #ret,th = cv.threshold(blur,0,255,cv.THRESH_BINARY+cv.THRESH_OTSU)
+
+    
+
+
+    cv.imshow(window_capture_name, frame)
     cv.imshow(window_detection_name, mask)
+
+    
 
     key = cv.waitKey(30)
     if key == ord('q') or key == 27:
