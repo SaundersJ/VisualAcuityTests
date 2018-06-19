@@ -11,18 +11,18 @@ window_detection_name = 'Object Detection'
 cv.namedWindow(window_capture_name)
 cv.namedWindow(window_detection_name)
 
-fileName = "C:/Users/Jack/Desktop/python/Project/IMG_0845.MOV"
+fileName = "C:/Users/Jack/Desktop/python/Project/IMG_0849.MOV"
 
 cap = cv.VideoCapture(fileName)
 
-KalmanManager.initKalman(3)
+KalmanManager.initKalman([[1,1],[2,2]])
 
-kalman = cv.KalmanFilter(4,2)
-kalman.measurementMatrix = np.array([[1,0,0,0],[0,1,0,0]],np.float32)
-kalman.transitionMatrix = np.array([[1,0,1,0],[0,1,0,1],[0,0,1,0],[0,0,0,1]],np.float32)
-kalman.processNoiseCov = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]],np.float32) * 0.03
+#kalman = cv.KalmanFilter(4,2)
+#kalman.measurementMatrix = np.array([[1,0,0,0],[0,1,0,0]],np.float32)
+#kalman.transitionMatrix = np.array([[1,0,1,0],[0,1,0,1],[0,0,1,0],[0,0,0,1]],np.float32)
+#kalman.processNoiseCov = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]],np.float32) * 0.03
 
-previous = [100000, 1000000]
+previous = [100000, 100000]
 
 meas = []   #list
 pred = []   #list
@@ -92,7 +92,8 @@ while True:
     centers = []
 
     mask = cv.cvtColor(mask, cv.COLOR_GRAY2BGR)
-    cN = 0
+    
+    #cN = 0
     for c in cnts:
         peri = cv.arcLength(c, True)
         approx = cv.approxPolyDP(c, 0.02 * peri, True)
@@ -107,15 +108,21 @@ while True:
             centerY = math.floor(y + (h/2))
             cv.circle(mask, (centerX, centerY), 10, (0,0,255), thickness=1)
             centers.append([centerX, centerY])
-            if cN == 0:
+            #if cN == 0:
                 ##=============Kalman Filter==================================
-                mp = np.array([[np.float32(centerX)],[np.float32(centerY)]])
-                kalman.correct(mp)
-                tp = kalman.predict()
-                cv.rectangle(mask, (int(tp[0]) - 5, int(tp[1]) - 5), (int(tp[0]) + 5, int(tp[1]) + 5), (0, 255, 255), 3);
+                #mp = np.array([[np.float32(centerX)],[np.float32(centerY)]])
+                #kalman.correct(mp)
+                #tp = kalman.predict()
+                #cv.rectangle(mask, (int(tp[0]) - 5, int(tp[1]) - 5), (int(tp[0]) + 5, int(tp[1]) + 5), (0, 255, 255), 3);
                 ##===========================================================
-                cN = cN + 1
-    
+                #cN = cN + 1
+
+    #s = KalmanManager.addPoints(centers)
+    #print(s)
+    #for x, y in s:
+    #    cv.rectangle(mask, (int(x) - 5, int(y) - 5), (int(x) + 5, int(y) + 5), (255, 0, 255), 3)
+
+
     #closest = [0, 0]
     #for [cX, cY] in centers:
     #    l1 = getlength(closest[0], closest[1], cX, cY)
@@ -177,7 +184,15 @@ while True:
         centerOfHeadX = centerofHeadX2
         centerOfHeadY = centerofHeadY2
 
-    cv.line(frame, (math.floor(centerOfEarsX), math.floor(centerOfEarsY)), (math.floor(centerOfHeadX), math.floor(centerOfHeadY)), (255,0,0), thickness=1)
+    #points = KalmanManager.addPoints([[centerOfEarsX,centerOfEarsY],[centerOfHeadX,centerOfHeadY]])
+
+    #for x, y in points:
+    #    cv.rectangle(mask, (int(x) - 5, int(y) - 5), (int(x) + 5, int(y) + 5), (255, 0, 255), 3)
+    
+    
+
+    cv.line(frame, points[0], points[1], (255,0,0), thickness=1)
+    #cv.line(frame, (math.floor(points[0][0]), math.floor(points[0][1])), (math.floor(points[1][0]), math.floor(points[1][1])), (255,0,0), thickness=1)
     seconds = frameNumber//fps
     cv.putText(frame,'Seconds: {}'.format(seconds),(10,500), cv.FONT_HERSHEY_SIMPLEX, 1,(0,255,255),2,cv.LINE_AA)
     

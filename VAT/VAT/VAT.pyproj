@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>d4faef27-8e3b-4324-a2de-9632b9f59ff7</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>OtsuThresh.py</StartupFile>
+    <StartupFile>MouseDetect.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -31,6 +31,9 @@
     <Compile Include="cells.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DrumDetect.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="EarDetect.py">
       <SubType>Code</SubType>
     </Compile>
@@ -44,6 +47,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="LogUtil.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MouseDetect.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="OtsuThresh.py">
