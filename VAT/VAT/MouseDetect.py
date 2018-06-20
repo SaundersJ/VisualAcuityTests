@@ -11,7 +11,7 @@ window_detection_name = 'Object Detection'
 cv.namedWindow(window_capture_name)
 cv.namedWindow(window_detection_name)
 #IMG_0845_GT
-fileName = "C:/Users/Jack/Desktop/python/Project/IMG_0845.MOV"
+fileName = "C:/Users/Jack/Desktop/python/Project/IMG_0849.MOV"
 LogUtil.init(fileName)
 cap = cv.VideoCapture(fileName)
 
@@ -19,7 +19,6 @@ previous = [100000, 100000]
 angles = []
 
 drumAverage = []
-drumAverageAverage = []
 
 frameNumber = 0
 centerLengths = []
@@ -147,7 +146,45 @@ while True:
     cv.line(frame, (math.floor(centerOfEarsX), math.floor(centerOfEarsY)), (math.floor(centerOfHeadX), math.floor(centerOfHeadY)), (255,0,0), thickness=1)
     cv.line(frame, (math.floor(centerOfEarsX), math.floor(centerOfEarsY)), (math.floor(previous[0]), math.floor(previous[1])), (255,0,255), thickness=1)
     
-    
+    ##Calculate Drum Rotation
+
+    squareWidth = 70    
+
+    point1 = (50, int(centerHeight) - int((squareWidth / 2)))
+    point2 = (50, int(centerHeight) + int((squareWidth / 2)))
+
+    cv.rectangle(frame, point1, point2, (0, 255, 255), 5);
+    #start:end
+    startSplice = int(centerHeight) - int((squareWidth / 2))
+    endSplice = int(centerHeight) + int((squareWidth / 2))
+
+    gray = cv.cvtColor(frame ,cv.COLOR_BGR2GRAY)
+    ret, thg = cv.threshold(gray, 0, 255 ,cv.THRESH_BINARY+cv.THRESH_OTSU)
+
+    drumAverage.append(int((np.mean(thg[startSplice:endSplice][0]) / 255) * 100))
+
+    if (len(drumAverage) > 10):
+        drumAverage.pop(0)    
+
+    change = []
+
+    for i in range(0, len(drumAverage) - 2):
+        change.append(abs(drumAverage[i] - drumAverage[(i + 1)]))
+        
+    meanChange = np.mean(change)
+
+    drumSpinning = True 
+    if (len(drumAverage) != 10 or meanChange < 1):
+        drumSpinning = False
+        #print("NotSpinning {}".format(drumAverage))
+        cv.putText(frame,'Not Spinning'.format(alpha),(0,30), cv.FONT_HERSHEY_SIMPLEX, 1,(0,0,255),2,cv.LINE_AA)
+    else:
+        cv.putText(frame,'Spinning'.format(alpha),(0,30), cv.FONT_HERSHEY_SIMPLEX, 1,(0,0,255),2,cv.LINE_AA)
+    ##
+
+    ##    
+
+
     ##calculate angle - cosine rule -> http://www.cimt.org.uk/projects/mepres/step-up/sect4/index.htm
 
     coord1 = [centerOfHeadX, centerOfHeadY]
@@ -180,67 +217,17 @@ while True:
     
     relativeSD = (standardDeviation / absAvg) * 100 #percent
     
-    #print(absAvg)
-    #print(alpha)
-
-    #print(avg)
 
     ##
 
     drumSpeed = 2 / 60 #rev/s
     percent = 0.30
     
-
     following = False
-    if ((absAvg < drumSpeed + (drumSpeed * percent)) and (absAvg > drumSpeed - (drumSpeed * percent)) and relativeSD < 300):
+    if (drumSpinning and (absAvg < drumSpeed + (drumSpeed * percent)) and (absAvg > drumSpeed - (drumSpeed * percent)) and relativeSD < 300):
         following = True
         print("{} Tracking rSTD:{}".format(frameNumber, relativeSD))
         LogUtil.write("{0:.2f}s Tracking rSTD: {1}".format((frameNumber/fps), relativeSD))
-
-    ##Detect Drun
-    
-    gray = cv.cvtColor(frame ,cv.COLOR_BGR2GRAY)
-    ret, thg = cv.threshold(gray, 0, 255 ,cv.THRESH_BINARY+cv.THRESH_OTSU)
-    
-    #Grabbing a rectangle from the side of the widow
-    #
-
-    squareWidth = 70    
-
-    point1 = (50, int(centerHeight) - int((squareWidth / 2)))
-    point2 = (50, int(centerHeight) + int((squareWidth / 2)))
-
-    cv.rectangle(frame, point1, point2, (0, 255, 255), 5);
-    #start:end
-    startSplice = int(centerHeight) - int((squareWidth / 2))
-    endSplice = int(centerHeight) + int((squareWidth / 2))
-
-    
-
-    drumAverage.append(int(int((np.mean(thg[startSplice:endSplice][0]) / 255) * 100) / 10))
-    
-    if (len(drumAverage) > 10):
-        drumAverage.pop(0)    
-
-    drumAverageAverage.append(drumAverage[1:] == drumAverage[:-1])
-    
-    if (len(drumAverageAverage) > 10):
-        drumAverageAverage.pop(0)
-
-    percentageAgree = sum(drumAverageAverage) / len(drumAverageAverage)
-
-    if (percentageAgree > 0.5):
-        #print("NotSpinning {}".format(drumAverage))
-        cv.putText(frame,'Not Spinning'.format(alpha),(0,30), cv.FONT_HERSHEY_SIMPLEX, 1,(0,0,255),2,cv.LINE_AA)
-    else:
-        cv.putText(frame,'Spinning'.format(alpha),(0,30), cv.FONT_HERSHEY_SIMPLEX, 1,(0,0,255),2,cv.LINE_AA)
-    #print(drumAverageAverage) 
-
-    #print(drumSD)
-    
-    #print("{}".format(drumAverage))
-
-    ##
 
     
     
@@ -253,14 +240,14 @@ while True:
     seconds = frameNumber//fps
     cv.putText(frame,'Seconds: {}'.format(seconds),(10,500), cv.FONT_HERSHEY_SIMPLEX, 1,(0,255,255),2,cv.LINE_AA)
     
-    cv.putText(frame,'GT Tracking: {}'.format("N/A"),(10,550), cv.FONT_HERSHEY_SIMPLEX, 1,(0,0,255),2,cv.LINE_AA)
+    cv.putText(frame,'Predicted Tracking: {}'.format(following),(10,550), cv.FONT_HERSHEY_SIMPLEX, 1,(0,0,255),2,cv.LINE_AA)
 
     gtTracking = False
     for [l,h] in groundtruth:
         if seconds >= l and seconds <= h:
             gtTracking = True
 
-    cv.putText(frame,'Predicted Tracking: {}'.format(gtTracking),(10,600), cv.FONT_HERSHEY_SIMPLEX, 1,(0,0,255),2,cv.LINE_AA)
+    cv.putText(frame,'GT Tracking: {}'.format(gtTracking),(10,600), cv.FONT_HERSHEY_SIMPLEX, 1,(0,0,255),2,cv.LINE_AA)
 
     cv.imshow(window_capture_name, frame)
     #cv.imshow(window_capture_name, thg)
