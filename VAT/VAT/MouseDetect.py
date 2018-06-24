@@ -4,6 +4,7 @@ from sklearn.cluster import MiniBatchKMeans
 import math
 from scipy.cluster.vq import kmeans,vq
 import LogUtil
+import zipapp
 
 window_capture_name = 'Video Capture'
 window_detection_name = 'Object Detection'
@@ -15,10 +16,13 @@ fileName = "C:/Users/Jack/Desktop/python/Project/IMG_0849.MOV"
 LogUtil.init(fileName)
 cap = cv.VideoCapture(fileName)
 
+trackingTimes = []
+
 previous = [100000, 100000]
 angles = []
 
 drumAverage = []
+drumMinMaxAverage = []
 
 frameNumber = 0
 centerLengths = []
@@ -166,18 +170,43 @@ while True:
     if (len(drumAverage) > 10):
         drumAverage.pop(0)    
 
+
     change = []
 
-    for i in range(0, len(drumAverage) - 2):
+    for i in range(0, len(drumAverage) - 1):
         change.append(abs(drumAverage[i] - drumAverage[(i + 1)]))
-        
-    meanChange = np.mean(change)
+    
+    if len(change) == 0:
+        change.append(0)
+    
+    
+    minMaxChange = max(change) - min(change)
 
+    drumMinMaxAverage.append(minMaxChange)
+
+    if len(drumMinMaxAverage) > 20:
+        drumMinMaxAverage.pop(0)
+
+    #print("{:.} {:.2f} {}".format(meanChange, avgChange, drumAverage))
+
+    #print(np.std(drumAverage))
+
+    #meanChange = max(change) - min(change)
+    #print(meanChange)
+    #meanChange = np.mean(change)
+    
+    #changeStd = np.std(change)
+    #rstd = changeStd / meanChange
+    #print("{}".format(rstd))
+    
+    #print(np.std(drumAverage))
+    #print(drumAverage)
     drumSpinning = True 
-    if (len(drumAverage) != 10 or meanChange < 1):
+    if (len(drumAverage) != 10 or max(drumMinMaxAverage) < 3):
         drumSpinning = False
         #print("NotSpinning {}".format(drumAverage))
         cv.putText(frame,'Not Spinning'.format(alpha),(0,30), cv.FONT_HERSHEY_SIMPLEX, 1,(0,0,255),2,cv.LINE_AA)
+        #print("Not Spinning {}".format(max(drumMinMaxAverage)))
     else:
         cv.putText(frame,'Spinning'.format(alpha),(0,30), cv.FONT_HERSHEY_SIMPLEX, 1,(0,0,255),2,cv.LINE_AA)
     ##
@@ -226,8 +255,9 @@ while True:
     following = False
     if (drumSpinning and (absAvg < drumSpeed + (drumSpeed * percent)) and (absAvg > drumSpeed - (drumSpeed * percent)) and relativeSD < 300):
         following = True
-        print("{} Tracking rSTD:{}".format(frameNumber, relativeSD))
+        print("{} {} Tracking rSTD:{}".format(frameNumber/fps, frameNumber, relativeSD))
         LogUtil.write("{0:.2f}s Tracking rSTD: {1}".format((frameNumber/fps), relativeSD))
+        trackingTimes.append(frameNumber/fps)
 
     
     
@@ -255,5 +285,64 @@ while True:
     key = cv.waitKey(30)
     if key == ord('q') or key == 27:
         break
+            
 
+    #changeTime = [j-i for i, j in zip(trackingTimes[:-1], trackingTimes[1:])]
+    #print("track: {}".format(trackingTimes))
+    #print("forma: {}".format(changeTime))
+
+    #if len(changeTime) > 1:
+    #    groupStart = 0
+    #    groupCount = 1
+
+#        threshold = 0.5
+#        dic = {}#
+#
+#        #[11, 11.003, 11.226, 11.738, 11.758]
+#        #[0.003, 0.223, 0.512, 0.02]#
+#
+#        for count, i in enumerate(changeTime):
+#            if i > threshold:
+#                #Create a new group
+#                print("{}-{} count: {}".format(trackingTimes[groupStart], trackingTimes[groupStart + groupCount - 1], groupCount))
+#                groupStart = count
+#                groupCount = 1
+#            else:
+#                groupCount = groupCount + 1
+    
+    #for count, i in enumerate(changeTime):
+    #    if i > threshold:
+    #        #New group
+    #        #currentCount = currentCount + 1
+    #        print("{}-{} count: {}".format(trackingTimes[current], trackingTimes[current + currentCount], currentCount))
+    #        #groups.append(["{}-{} count:".format(trackingTimes[current - 1], [trackingTimes[current - 1 + currentCount - 1], currentCount])
+    #        
+    #        current = count - 1
+    #        currentCount = 1
+    #    else:
+    #        currentCount = currentCount + 1
+
+    #print(dic)
+            
 cap.release()
+
+groupStart = 0
+groupCount = 1
+
+prev = 0
+for count, i in enumerate(trackingTimes):
+    if groupStart == 0:
+        groupStart = i
+    else:
+        if i - prev > 0.5:
+            #above threshold
+            LogUtil.writeToResults("{} - {} count: {}".format(groupStart, prev, groupCount))
+            #print("{} - {} count: {}".format(groupStart, prev, groupCount))
+            groupStart = i
+            groupCount = 1
+        else:
+            groupCount = groupCount + 1
+    prev = i
+
+####Do stuff with the times.......
+####Be able to add more videos....

@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>d4faef27-8e3b-4324-a2de-9632b9f59ff7</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>MouseDetect.py</StartupFile>
+    <StartupFile>MouseDetect2.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -50,6 +50,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MouseDetect.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MouseDetect2.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="OtsuThresh.py">
