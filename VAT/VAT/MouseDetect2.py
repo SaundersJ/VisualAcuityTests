@@ -6,11 +6,13 @@ from scipy.cluster.vq import kmeans,vq
 import LogUtil
 import zipapp
 from datetime import datetime
+from PyQt5 import QtCore, QtGui, QtWidgets
+import sys
+from MouseTextBox import TextBox
 
 ##Parameters
-fileNameList = ["C:/Users/Jack/Desktop/python/Project/IMG_0848.MOV", "C:/Users/Jack/Desktop/python/Project/IMG_0850.MOV"]
+fileNameList = ["C:/Users/Jack/Desktop/python/Project/IMG_0845.MOV"]
 viewVideo = True
-
 
 
 ##Inits
@@ -21,9 +23,46 @@ if viewVideo:
     cv.namedWindow(window_capture_name)
     cv.namedWindow(window_detection_name)
 
+##Methods
+def getlength(x1, y1, x2, y2):
+    return math.sqrt((x2-x1)**2 + (y2-y1)**2)
+
+def getlength(coord1, coord2):
+    return math.sqrt((coord2[0]-coord1[0])**2 + (coord2[1]-coord1[1])**2)
+
+##GUI
+#app = QtWidgets.QApplication(sys.argv)
+app = QtWidgets.QApplication(sys.argv)
+s = TextBox()
+s.logMessage("Init")
+s.logMessage("SADSADSD")
+#window = QtGui.QWidget()
+#window.setGeometry(50, 50, 500, 300)
+#window.setWindowTitle("PyQT Tuts!")
+
+#window.show()
+
 ##Program
 print("Starting Tracking.....")
 for fileName in fileNameList:
+    QtWidgets.QApplication.processEvents()
+    ##Kalman Filter
+    kalman = cv.KalmanFilter(4,2)
+    kalman.measurementMatrix = np.array([[1,0,0,0],
+                                         [0,1,0,0]],np.float32)
+
+    kalman.transitionMatrix = np.array([[1,0,1,0],
+                                        [0,1,0,1],
+                                        [0,0,1,0],
+                                        [0,0,0,1]],np.float32)
+
+    kalman.processNoiseCov = np.array([[1,0,0,0],
+                                       [0,1,0,0],
+                                       [0,0,1,0],
+                                       [0,0,0,1]],np.float32) * 0.03
+    ##End of Kalman Filter
+
+    fileViewStartTime = datetime.now()
     print("\n\n")
     print("Init for file: {}".format(fileName))
     LogUtil.init(fileName)
@@ -46,23 +85,9 @@ for fileName in fileNameList:
     centerHeight = height / 2
     fps = math.ceil(cap.get(cv.cv2.CAP_PROP_FPS))
 
-    file  = open("C:/Users/Jack/Desktop/python/Project/IMG_0845_GT.txt", "r")
-    lines = file.readlines() 
-    groundtruth = []
-    for l in lines:
-        l = l.split("-")
-        groundtruth.append([l[0], l[1].rstrip()])
-
-    groundtruth = [[int(i[0]), int(i[1])] for i in groundtruth]
-    file.close() 
-
-    def getlength(x1, y1, x2, y2):
-        return math.sqrt((x2-x1)**2 + (y2-y1)**2)
-
-    def getlength(coord1, coord2):
-        return math.sqrt((coord2[0]-coord1[0])**2 + (coord2[1]-coord1[1])**2)
     print(datetime.now())
     while True:
+        QtWidgets.QApplication.processEvents()
         frameNumber = frameNumber + 1
         ret, frame = cap.read()
 
@@ -95,11 +120,11 @@ for fileName in fileNameList:
 
         im2, cnts, hierarchy = cv.findContours(mask.copy(), cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
         cnts = sorted(cnts, key = cv.contourArea, reverse = True)[:3]
-
+        
         centers = []
 
         mask = cv.cvtColor(mask, cv.COLOR_GRAY2BGR)
-    
+
         for c in cnts:
             peri = cv.arcLength(c, True)
             approx = cv.approxPolyDP(c, 0.02 * peri, True)
@@ -112,6 +137,8 @@ for fileName in fileNameList:
             if viewVideo:
                 cv.circle(mask, (centerX, centerY), 10, (0,0,255), thickness=1)
             centers.append([centerX, centerY])
+    
+        
 
         mx1 = 0
         my1 = 0
@@ -203,27 +230,11 @@ for fileName in fileNameList:
         if len(drumMinMaxAverage) > 20:
             drumMinMaxAverage.pop(0)
 
-        #print("{:.} {:.2f} {}".format(meanChange, avgChange, drumAverage))
-
-        #print(np.std(drumAverage))
-
-        #meanChange = max(change) - min(change)
-        #print(meanChange)
-        #meanChange = np.mean(change)
-    
-        #changeStd = np.std(change)
-        #rstd = changeStd / meanChange
-        #print("{}".format(rstd))
-    
-        #print(np.std(drumAverage))
-        #print(drumAverage)
         drumSpinning = True 
         if (len(drumAverage) != 10 or max(drumMinMaxAverage) < 3):
             drumSpinning = False
-            #print("NotSpinning {}".format(drumAverage))
             if viewVideo:
                 cv.putText(frame,'Not Spinning'.format(alpha),(0,30), cv.FONT_HERSHEY_SIMPLEX, 1,(0,0,255),2,cv.LINE_AA)
-            #print("Not Spinning {}".format(max(drumMinMaxAverage)))
         else:
             if viewVideo:
                 cv.putText(frame,'Spinning'.format(alpha),(0,30), cv.FONT_HERSHEY_SIMPLEX, 1,(0,0,255),2,cv.LINE_AA)
@@ -282,10 +293,7 @@ for fileName in fileNameList:
             print("{} {} Tracking rSTD:{}".format(frameNumber/fps, frameNumber, relativeSD))
             LogUtil.write("{0:.2f}s Tracking rSTD: {1}".format((frameNumber/fps), relativeSD))
             trackingTimes.append(frameNumber/fps)
-
-    
-    
-        #print("Compare: Drum {} and mouse {}  and {}".format(drumSpeed, avg, following))    
+  
 
         previous = [centerOfHeadX, centerOfHeadY]
 
@@ -296,77 +304,30 @@ for fileName in fileNameList:
         if viewVideo:
             cv.putText(frame,'Predicted Tracking: {}'.format(following),(10,550), cv.FONT_HERSHEY_SIMPLEX, 1,(0,0,255),2,cv.LINE_AA)
 
-        gtTracking = False
-        for [l,h] in groundtruth:
-            if seconds >= l and seconds <= h:
-                gtTracking = True
-
-        if viewVideo:
-            cv.putText(frame,'GT Tracking: {}'.format(gtTracking),(10,600), cv.FONT_HERSHEY_SIMPLEX, 1,(0,0,255),2,cv.LINE_AA)
-
+        key = 1
         if viewVideo:
             cv.imshow(window_capture_name, frame)
-        #cv.imshow(window_capture_name, thg)
             cv.imshow(window_detection_name, mask)
-        #key = cv.waitKey(30)
-        key = 1
-        #print(frameNumber)
-
-        key = 1
-        if viewVideo:
             key = cv.waitKey(30)
-            
-            
-
 
         if key == ord('q') or key == 27:
             break
         if frameNumber % 100 == 0:
             print(frameNumber / int(cap.get(cv.CAP_PROP_FRAME_COUNT)))
 
-        #changeTime = [j-i for i, j in zip(trackingTimes[:-1], trackingTimes[1:])]
-        #print("track: {}".format(trackingTimes))
-        #print("forma: {}".format(changeTime))
+    ##End of Capture for file
 
-        #if len(changeTime) > 1:
-        #    groupStart = 0
-        #    groupCount = 1
-
-    #        threshold = 0.5
-    #        dic = {}#
-    #
-    #        #[11, 11.003, 11.226, 11.738, 11.758]
-    #        #[0.003, 0.223, 0.512, 0.02]#
-    #
-    #        for count, i in enumerate(changeTime):
-    #            if i > threshold:
-    #                #Create a new group
-    #                print("{}-{} count: {}".format(trackingTimes[groupStart], trackingTimes[groupStart + groupCount - 1], groupCount))
-    #                groupStart = count
-    #                groupCount = 1
-    #            else:
-    #                groupCount = groupCount + 1
-    
-        #for count, i in enumerate(changeTime):
-        #    if i > threshold:
-        #        #New group
-        #        #currentCount = currentCount + 1
-        #        print("{}-{} count: {}".format(trackingTimes[current], trackingTimes[current + currentCount], currentCount))
-        #        #groups.append(["{}-{} count:".format(trackingTimes[current - 1], [trackingTimes[current - 1 + currentCount - 1], currentCount])
-        #        
-        #        current = count - 1
-        #        currentCount = 1
-        #    else:
-        #        currentCount = currentCount + 1
-
-        #print(dic)
-            
     cap.release()
     print(datetime.now())
+    print("That viewing took {}".format(datetime.now() - fileViewStartTime))
+
     groupStart = 0
     groupCount = 1
     prev = 0
     pos = 0
+    
+    totalTime = 0
+    totalGroups = 0
     for count, i in enumerate(trackingTimes):
         if groupStart == 0:
             groupStart = i
@@ -381,9 +342,16 @@ for fileName in fileNameList:
                 #print("{} - {} count: {}".format(groupStart, prev, groupCount))
                 groupStart = i
                 groupCount = 1
+
+                totalTime = totalTime + diff
+                totalGroups = totalGroups + 1
             else:
                 groupCount = groupCount + 1
         prev = i
-
+    
+    pos = pos + 2 
+    LogUtil.writeToResults(pos, 0, "Total Time: {:.2f}".format(totalTime))
+    pos = pos + 1
+    LogUtil.writeToResults(pos, 0, "Total Stares: {}".format(totalGroups))
     ####Do stuff with the times.......
     ####Be able to add more videos....

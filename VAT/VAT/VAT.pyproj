@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>d4faef27-8e3b-4324-a2de-9632b9f59ff7</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>MouseDetect2.py</StartupFile>
+    <StartupFile>mainProgram\MainApp.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -31,6 +31,12 @@
     <Compile Include="cells.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Detection\EarDetection.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Detection\MainProg.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DrumDetect.py">
       <SubType>Code</SubType>
     </Compile>
@@ -40,10 +46,26 @@
     <Compile Include="GroundTruth.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="mainProgram\KalmanObject.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="mainProgram\LogUtil.py" />
+    <Compile Include="mainProgram\MouseDetectObject.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="mainProgram\UserInterface.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="mainProgram\MainApp.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MouseTextBox.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="KalmanFilter.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="KalmanManager.py">
+    <Compile Include="mainProgram\KalmanManager.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="LogUtil.py">
@@ -71,6 +93,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="VAT.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Detection\" />
+    <Folder Include="mainProgram\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

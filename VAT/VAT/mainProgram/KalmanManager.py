@@ -2,12 +2,43 @@ import cv2 as cv
 import numpy as np
 import math
 
+##Use the prediction first then add the correction after...
+
+#Init
+
+#for:
+    #Predict
+    #Correct
+    
+    #Compare to true Value
+    #Number which points are which
+
 previousCoords = []
 previousPredict = []
 filters = []
 number = 0
 ##arguments, list of coords
 ##[[1,1],[1,1],[1,1]]
+
+#Parse any coord
+#Return the coords in order
+
+def defParsePositions(coords):
+    for coord in coords:
+        length = -1
+        element = -1
+
+        for count, kalman in enumerate(filters):
+            prediction = kalman.predict()
+            newLength = getlength(prediction, coord)
+            if element == -1 or length > newLength:
+                length = newLength
+                element = count - 1
+
+        
+
+                
+
 def initKalman(coords):
     global previousCoords, previousPredict, filters, number
     number = len(coords)
@@ -19,10 +50,9 @@ def initKalman(coords):
         kalman.processNoiseCov = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]],np.float32) * 0.03
         filters.append(kalman)
 
-        mp = np.array([[np.float32(x)],[np.float32(y)]])
-        kalman.correct(mp)
-        tp = kalman.predict()
-        previousPredict.append([tp[0], tp[1]])
+        initial = np.array([[np.float32(x)],[np.float32(y)]])
+        kalman.statePre(initial)
+        previousPredict.append(initial)
 
 def getlength(coord1, coord2):
     return math.sqrt((coord2[0]-coord1[0])**2 + (coord2[1]-coord1[1])**2)
@@ -51,10 +81,13 @@ def addPoints(coords):
             print(chosenCoordPos)
             previousCoords[i] = [sX, sY]
             kalman = filters[i]
-            mp = np.array([[np.float32(sX)],[np.float32(sY)]])
-            kalman.correct(mp)
+            
             tp = kalman.predict()
             previousPredict[i] = ([tp[0], tp[1]])
+
+            mp = np.array([[np.float32(sX)],[np.float32(sY)]])
+            kalman.correct(mp)
+
 
             coords[chosenCoordPos] = [100000, 100000]
             i = i + 1
@@ -67,7 +100,10 @@ def addPoints(coords):
             tp = kalman.predict()
             previousPredict[i] = ([tp[0], tp[1]])
         print("NOT ENOUGH DATAPOINTS")
+
     return previousPredict
+
+
         
         
 
