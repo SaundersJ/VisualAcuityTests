@@ -199,9 +199,16 @@ def getTrackingTimes(file, viewVideo, gui):
             #length1 = math.sqrt((centerofHeadX1 - centerWidth)**2 + (centerofHeadY1 - centerHeight)**2)
             #length2 = math.sqrt((centerofHeadX2 - centerWidth)**2 + (centerofHeadY2 - centerHeight)**2)
 
-            length1 = math.sqrt((centerofHeadX1 - centerWidth)**2 + (centerofHeadY1 - centerHeight)**2)
-            length2 = math.sqrt((centerofHeadX2 - centerWidth)**2 + (centerofHeadY2 - centerHeight)**2)
-    
+            length1 = 0
+            length2 = 0
+
+           
+            if len(centers) != 3:
+                continue
+
+            length1 = math.sqrt((centerofHeadX1 - centers[tail][0])**2 + (centerofHeadY1 - centers[tail][1])**2)
+            length2 = math.sqrt((centerofHeadX2 - centers[tail][0])**2 + (centerofHeadY2 - centers[tail][1])**2)
+
             centerOfHeadX = 0
             centerOfHeadY = 0
 
@@ -221,8 +228,8 @@ def getTrackingTimes(file, viewVideo, gui):
             
 
             if viewVideo:
-                cv.line(frame, (math.floor(centerOfEarsX), math.floor(centerOfEarsY)), (math.floor(centerOfHeadX), math.floor(centerOfHeadY)), (255,0,0), thickness=1)
-                cv.line(frame, (math.floor(centerOfEarsX), math.floor(centerOfEarsY)), (math.floor(previous[0]), math.floor(previous[1])), (255,0,255), thickness=1)
+                cv.line(mask, (math.floor(centerOfEarsX), math.floor(centerOfEarsY)), (math.floor(centerOfHeadX), math.floor(centerOfHeadY)), (255,0,0), thickness=1)
+                cv.line(mask, (math.floor(centerOfEarsX), math.floor(centerOfEarsY)), (math.floor(previous[0]), math.floor(previous[1])), (255,0,255), thickness=1)
     
             ##Calculate Drum Rotation
 
